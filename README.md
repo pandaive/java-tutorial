@@ -17,8 +17,10 @@ In this repository, you can find basic gradle project structure:
 ├── src
 │   ├── main
 │   │   ├── java
+│   │       ├── tutorial
 │   ├── test
 │   │   ├── java
+│   │       ├── tutorial
 ├── build.gradle
 ├── gradlew
 ├── gradlew.bat
@@ -31,10 +33,32 @@ Source files are split into main - java classes and test - unit tests for java c
 ├── src
 │   ├── main
 │   │   ├── java
-│   │       ├── Library.java
+│   │       ├── tutorial
+│   │           ├── Library.java
 │   ├── test
 │   │   ├── java
-│   │       ├── LibraryTest.java
+│   │       ├── tutorial
+│   │           ├── LibraryTest.java
 ```
 
 Check out the build.gradle file. It contains project plugins, dependencies, repositories, build scripts etc. Now it's initialized with basic java plugin, test library dependency and jcenter() repository.
+
+<h2> Step 1: Start gradle application </h2>
+
+1. Checkout that project is built correctly with gradle using gradle build tool:
+
+```
+./gradlew build
+```
+
+You should see BUILD SUCCESSFUL output.
+
+To start an application, you do
+
+```
+./gradlew run
+```
+
+Right now the build will fail, because there is no executable file.
+
+Let's 
