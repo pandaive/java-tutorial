@@ -30,6 +30,8 @@ dependencies {
 	compile "org.springframework.boot:spring-boot-starter"
 	compile "org.springframework.boot:spring-boot-starter-web"
 	compile "org.springframework.boot:spring-boot-starter-test"
+	
+	compile 'org.projectlombok:lombok:1.16.10'
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
