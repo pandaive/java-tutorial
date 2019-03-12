@@ -231,3 +231,45 @@ public class QueryTest {
 ```
 
 Now build your application again. You should see additional test task from gradle. If tests are passing, build will be succesfull, otherwise gradle will generate you a report in build/reports directory. Change expected message to see test failing and the report.
+
+<h2> Step 4: Path params, POST method, request body, service classes </h2>
+
+First of all, we want to move the functionality of request handling from web/Query class to keep only endpoint declaration there. Create tutorial/service directory and create QueryService.java class inside. Annotate it as a @Component so we will be able to inject it in Query class and use it to handle the request.
+
+```java
+package tutorial.service;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class QueryService {
+	
+	public String getHello() {
+		return "Hello World";
+	}
+	
+}
+```
+
+Now use this class in Query.java.
+
+```java
+...
+
+import org.springframework.beans.factory.annotation.Autowired;
+import tutorial.service.QueryService;
+
+public class Query {
+	
+	@Autowired
+	QueryService queryService;
+	
+	@GetMapping(path = "/hello")
+	public String getHello() {
+		return queryService.getHello();
+	}
+```
+
+Check that your tests are still passing! If not, check the fail reason and correct the issue :)
+
+Now let's handle the path param and say hello to you.
