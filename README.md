@@ -61,4 +61,44 @@ To start an application, you do
 
 Right now the build will fail, because there is no executable file.
 
-Let's 
+Let's create application starting point: class Application.java in tutorial package (src/main/java/tutorial/Application.java):
+
+```java
+package tutorial;
+
+public class Application {
+	
+	public static void main(String[] args) {
+		System.out.println("Hello world!");
+	}
+
+}
+```
+
+In each class you must define package and class. Main method is a starting point for your application.
+
+Try to run `./gradlew build`. Build shoud be successful. Now try to run it with `./gradlew run`. Build will fail, because you haven't specify that Application.java is your starting point.
+
+Let's go to build.gradle and add necessary things:
+
+```java
+apply plugin: 'java-library'
+apply plugin: 'application'
+
+mainClassName = entrypoint
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+```
+
+The Application plugin facilitates creating an executable JVM application.  MainClassName defines the main class. You also specify compatibility of your application. mainClassName is set to entrypoint, so we want to keep such stuff in a gradle properties file to keep everything clean.
+
+Create `gradle.properties` file in a project root directory with entrypoint declaration:
+
+```java
+entrypoint=tutorial.Application
+```
+
+Now do `./gradlew build` and `./gradlew run` again. Now you should see Hello World message!
+
+Further when "run application" stated, it means executing those both commands if not stated otherwise.
