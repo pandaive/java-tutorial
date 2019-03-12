@@ -470,3 +470,95 @@ curl -X POST \
 	"tax": 0.2
 }'
 ```
+
+<h2> Step 6: Custom errors and error handling </h2>
+
+Sometimes you may want to have custom errors or custom error handling. Now, if you put a string in one of the fields in your POST request body, you will see an error like this one:
+
+```
+{
+    "timestamp": "2019-03-12T12:56:50.768+0000",
+    "status": 400,
+    "error": "Bad Request",
+    "message": "JSON parse error: Cannot deserialize value of type `int` from String \"blabla\": not a valid Integer value; nested exception is com.fasterxml.jackson.databind.exc.InvalidFormatException: Cannot deserialize value of type `int` from String \"blabla\": not a valid Integer value\n at [Source: (PushbackInputStream); line: 2, column: 14] (through reference chain: tutorial.model.Bill[\"quantity\"])",
+    "path": "/myapi/price"
+}
+```
+
+But you may not want to expose your implementation or you may want to send back specific error message/status code. In this case you can create an error handler. Spring Boot comes with @RestControllerAdvice annotation in which you can write your own exception handlers. If you checkout application logs after getting error as above, you will find information about HttpMessageNotReadableException, so this is the one that you want to overwrite.
+
+Create directory `/tutorial/exception/` and Handler.java class inside like following:
+
+```java
+package tutorial.exception;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@Component
+@RestControllerAdvice
+public class Handler {
+	
+	@ExceptionHandler(value = HttpMessageNotReadableException.class)
+    @ResponseBody
+    public void handle(HttpMessageNotReadableException e, HttpServletResponse response) throws IOException {
+        String message = "Invalid value given in request body. " + convertHttpNotReadableExceptionMessage(e.getMessage());
+        response.sendError(HttpStatus.BAD_REQUEST.value(), message);
+    }
+	
+	private String convertHttpNotReadableExceptionMessage(String message) {
+        String firstLine = message.substring(message.indexOf("type"), message.indexOf("\n"));
+        String[] s = firstLine.split(" ");
+        String[] fields = message.split("\"");
+        String fieldName = fields[fields.length-2];
+        String requiredValue = s[s.length-2];
+        String givenValueType = s[3];
+        String givenValue = fields[1];
+        
+        return "Field " + fieldName + " must be of type " + requiredValue + ". "
+                + "Value of type " + givenValueType + " provided: " + givenValue + ".";
+    }
+
+}
+```
+
+You create a method handle() and specify which exception to handle in @ExceptionHandler annotation with specific exception as value and get exception itself and response object in method parameters. Here I we have added very simple message parser because in this case, we want a nicer message. We keep error code 400.
+
+You may also want to create your own exception type. Using our POST price endpoint, we may want to force users to use maximum quantity of 10 for some reasons. Let's create our own exception in `/tutorial/exception/` directory and name it ex. MaximumQuantityExceededException.java
+
+```java
+package tutorial.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class MaximumQuantityExceededException extends RuntimeException {
+	
+	public MaximumQuantityExceededException(int quantity) {
+		super("Quantity " + quantity + " exceeds maximum quantity allowed: 10");
+	}
+
+}
+```
+
+Then we can use this exception when validating incoming request (CommandService.java):
+
+```java
+public double getPrice(Bill bill) {
+		if (bill.getQuantity() > 10) {
+			throw new MaximumQuantityExceededException(bill.getQuantity());
+		}
+		return (bill.getPrice() + bill.getPrice() * bill.getVatRate()) * bill.getQuantity();
+	}
+```
+
+Now try to send request with quantity higher than 10.
