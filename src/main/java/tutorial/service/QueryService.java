@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class QueryService {
 	
-	public String getHello() {
-		return "Hello world!";
+	public String getHello(String name) {
+		return "Hello " + name + "!";
 	}
 	
 }

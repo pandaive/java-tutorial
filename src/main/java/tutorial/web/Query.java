@@ -2,6 +2,7 @@ package tutorial.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,9 +15,9 @@ public class Query {
 	@Autowired
 	QueryService queryService;
 	
-	@GetMapping(path = "/hello")
-	public String getHello() {
-		return queryService.getHello();
+	@GetMapping(path = "/hello/{name}")
+	public String getHello(@PathVariable String name) {
+		return queryService.getHello(name);
 	}
 
 }

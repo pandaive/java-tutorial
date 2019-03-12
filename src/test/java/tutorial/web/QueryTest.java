@@ -24,7 +24,7 @@ public class QueryTest {
 	
 	@Test
 	public void getHello() throws Exception {
-		 mvc.perform(MockMvcRequestBuilders.get("/myapi/hello").accept(MediaType.APPLICATION_JSON))
+		 mvc.perform(MockMvcRequestBuilders.get("/myapi/hello/world").accept(MediaType.APPLICATION_JSON))
          	.andExpect(status().isOk())
          	.andExpect(content().string("Hello world!"));
 	}
