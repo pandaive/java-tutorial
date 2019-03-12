@@ -167,3 +167,67 @@ You will see your application started with Spring logo, a lot of logs and finall
 ```
 2019-03-12 09:37:51.444  INFO 17860 --- [main] tutorial.Application: Started Application in 4.125 seconds (JVM running for 4.572)
 ```
+
+<h2> Step 3: Create first API endpoints </h2>
+
+Having Spring Boot running our API, let's start defining endpoints. Let's create a new directory `web` in our tutorial package, which will hold our API endpoints declarations. Let's create Query class and a method which will return Hello World to the API call.
+
+```java
+package tutorial.web;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/myapi")
+public class Query {
+	
+	@GetMapping(path = "/hello")
+	public String getHello() {
+		return "Hello world!";
+	}
+
+}
+```
+
+We annotate it with @RestController to indicate that this class containts Rest endpoints and we specify path mappings, one to whole class - automatically prefixed to each endpoint path and one to specific endpoint. Now build and run your project. By default, your API will be listening on port 8080. Use postman to GET http://localhost:8080/myapi/hello or just type the address in your browser. You should see a Hello World response! Also checkout the logs in your terminal to see that spring handled this request.
+
+Take a time to think about unit test to your endpoint. Create a QueryTest.java in src/test/java/tutorial/web and create a test using MockMvc to mock your server.
+
+```java
+package tutorial.web;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+public class QueryTest {
+	
+	@Autowired
+	private MockMvc mvc;
+	
+	@Test
+	public void getHello() throws Exception {
+		 mvc.perform(MockMvcRequestBuilders.get("/myapi/hello").accept(MediaType.APPLICATION_JSON))
+         	.andExpect(status().isOk())
+         	.andExpect(content().string("Hello world!"));
+	}
+
+}
+```
+
+Now build your application again. You should see additional test task from gradle. If tests are passing, build will be succesfull, otherwise gradle will generate you a report in build/reports directory. Change expected message to see test failing and the report.
