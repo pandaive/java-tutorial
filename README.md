@@ -43,6 +43,10 @@ Source files are split into main - java classes and test - unit tests for java c
 
 Check out the build.gradle file. It contains project plugins, dependencies, repositories, build scripts etc. Now it's initialized with basic java plugin, test library dependency and jcenter() repository.
 
+------------------------
+
+<h3> For solutions to each steps, checkout step-x branches. </h3>
+
 <h2> Step 1: Start gradle application </h2>
 
 1. Checkout that project is built correctly with gradle using gradle build tool:
@@ -232,9 +236,9 @@ public class QueryTest {
 
 Now build your application again. You should see additional test task from gradle. If tests are passing, build will be succesfull, otherwise gradle will generate you a report in build/reports directory. Change expected message to see test failing and the report.
 
-<h2> Step 4: Path params, POST method, request body, service classes </h2>
+<h2> Step 4: Path params, request params, service classes </h2>
 
-First of all, we want to move the functionality of request handling from web/Query class to keep only endpoint declaration there. Create tutorial/service directory and create QueryService.java class inside. Annotate it as a @Component so we will be able to inject it in Query class and use it to handle the request.
+First of all, we want to move the functionality of request handling from web/Query class to keep only endpoint declaration there. It will coome useful when we do more complicated endpoints. Create tutorial/service directory and create QueryService.java class inside. Annotate it as a @Component so we will be able to inject it in Query class and use it to handle the request.
 
 ```java
 package tutorial.service;
@@ -272,4 +276,67 @@ public class Query {
 
 Check that your tests are still passing! If not, check the fail reason and correct the issue :)
 
-Now let's handle the path param and say hello to you.
+Create also a test for your service class in src/test/java/tutorial/service, call it QueryServiceTest.java. This one will be simpler, as we don't need to mock api request:
+
+```java
+package tutorial.service;
+
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class QueryServiceTest {
+	
+	@Autowired
+	QueryService queryService;
+	
+	@Test
+	public void getHelloTest() {
+		assertEquals("Hello World!", queryService.getHello());
+	}
+
+}
+```
+
+Notice that you again autowire queryService object to use it.
+
+Now let's handle the path param and say hello to you. You need to add it in a path declaration and also pass it to a method as a param. Spring will handle that for you, just use @PathVariable annotation.
+
+```java
+import org.springframework.web.bind.annotation.PathVariable;
+
+...
+
+	@GetMapping(path = "/hello/{name}")
+	public String getHello(@PathVariable("name") String name) {
+		return queryService.getHello(name);
+	}
+```
+
+Adjust getHello() method in QueryService class to handle the param:
+
+```java
+	public String getHello(String name) {
+		return "Hello " + name + "!";
+	}
+```
+
+If you build your application now, tests will fail. You need to also adjust it. Just add a param in request path: `MockMvcRequestBuilders.get("/myapi/hello/world")`. In QueryServiceTest add a param to test if this method will work correctly. Check that your application is built correctly. You can also run it and check it in Postman/browser with a new path.
+
+If you want to add a request parameter (/myapi/hello?name=world) you don't need to declare it in path mapping, just add a parameter in your method like:
+
+```java
+	@GetMapping(path = "/hello")
+	public String getHello(@RequestParam(value="name", required=true) String name) {
+		return queryService.getHello(name);
+	}
+```
+
+You can try it out by yourself.
+
