@@ -193,7 +193,7 @@ public class Query {
 
 We annotate it with @RestController to indicate that this class containts Rest endpoints and we specify path mappings, one to whole class - automatically prefixed to each endpoint path and one to specific endpoint. Now build and run your project. By default, your API will be listening on port 8080. Use postman to GET http://localhost:8080/myapi/hello or just type the address in your browser. You should see a Hello World response! Also checkout the logs in your terminal to see that spring handled this request.
 
-Take a time to think about unit test to your endpoint. Create a QueryTest.java in src/test/java/tutorial/web and create a test using MockMvc to mock your server.
+Take a time to think about unit test to your endpoint. Create a QueryTest.java in src/test/java/tutorial/web and create a test using MockMvc to mock your request.
 
 ```java
 package tutorial.web;
