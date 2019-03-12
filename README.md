@@ -102,3 +102,68 @@ entrypoint=tutorial.Application
 Now do `./gradlew build` and `./gradlew run` again. Now you should see Hello World message!
 
 Further when "run application" stated, it means executing those both commands if not stated otherwise.
+
+<h2> Step 2: create Spring Boot application </h2>
+
+We want to create Spring Boot API. For details about Spring Boot, refer to https://spring.io/projects/spring-boot, espacially this tutorial: https://spring.io/guides/gs/spring-boot/
+
+We will need to add Spring Boot plugin, dependency and a buildscript first:
+
+```java
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:" + frameworkVersion
+    }
+}
+
+...
+apply plugin: 'application'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+...
+
+dependencies {
+	compile "org.springframework.boot:spring-boot-starter"
+	compile "org.springframework.boot:spring-boot-starter-web"
+	compile "org.springframework.boot:spring-boot-starter-test"
+...
+}
+
+...
+```
+We have a new variable frameworkVersion here, let's add it in gradle.properties:
+
+```java
+entrypoint=tutorial.Application
+frameworkVersion=2.0.5.RELEASE
+```
+
+Now build your project and check that dependencies are downloaded and build is successful.
+
+Let's specify that our application is a spring boot application by adding @SpringBootApplication annotation to our main class and call `run` method inside main class. This will start our spring boot app.
+
+```java
+package tutorial;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class Application {
+	
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+
+}
+```
+
+You will see your application started with Spring logo, a lot of logs and finally a log indicating that application started correctly:
+
+```
+2019-03-12 09:37:51.444  INFO 17860 --- [main] tutorial.Application: Started Application in 4.125 seconds (JVM running for 4.572)
+```
