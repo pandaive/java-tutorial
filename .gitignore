@@ -1,0 +1,10 @@
+#eclipse workspace
+.classpath
+.project
+.settings/
+
+# gradle files
+bin/
+build/
+.gradle/
+gradle/
