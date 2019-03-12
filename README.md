@@ -340,3 +340,133 @@ If you want to add a request parameter (/myapi/hello?name=world) you don't need 
 
 You can try it out by yourself.
 
+<h2> Step 5: POST endpoint, request body </h5>
+
+Finally let's create a POST endpoint (put/delete will work similarly). 
+
+Let's create another class in `web/` directory, Command.java. Annotate it with @RestController and add a method to handle the post request to your API. 
+
+Create CommandService.java in service directory, annotate it as Component and autowire it into Command.java. The same way as with Query classes. 
+
+Define path mapping. Path mapping of command can be the same as of query (@RequestMapping("/myapi")). 
+
+Add a test classes CommandTest.java and CommandServiceTest.java in `src/test/java/tutorial/web` and `src/test/java/tutorial/service`. 
+
+To handle POST request we will need to define model class, so the spring will get json request body and inject it in an object of this class. 
+
+Let's build an endpoint to calculate the bill price. We will need to provide bill information: product quantity, price and vat rate :wink:
+
+Create `tutorial/model` directory. Create a Bill.java class and declare 3 fields:
+
+```java
+package tutorial.model;
+
+public class Bill {
+
+	private int quantity;
+	private double price;
+	private double vatRate;
+	
+}
+```
+
+In Java you declare class fields as private and you access them by getter and setters from outside. Always. But we don't want to write getters and setters for each fields and that's when lombok library comes handy. It comes with several handy annotations that will preprocess the class and do the thing for us.
+
+Let's declare it as a dependency in our project in build.gradle:
+
+```
+dependencies {
+	compile "org.springframework.boot:spring-boot-starter"
+	compile "org.springframework.boot:spring-boot-starter-web"
+	compile "org.springframework.boot:spring-boot-starter-test"
+	
+	compile 'org.projectlombok:lombok:1.16.10'
+
+	...
+}
+```
+
+If you use IDE, you may need to refresh your gradle project to be able to use those annotations. Otherwise, just do `./gradlew build` to download the libraries. You can checkout lombok annotations here: https://projectlombok.org/features/all
+
+We want to use @Data annotation, to generate getters and setters. Add it for the class, and you can assume that you have getters and setters for all of the fields.
+
+```java
+import lombok.Data;
+
+@Data
+public class Bill {
+	...
+}
+```
+
+Now let's create a POST endpoint in Command.java which will receive json request body with fields as declared in Bill class.
+
+
+```java
+	@PostMapping(path = "/price", consumes = "application/json")
+	public double calculatePrice(@RequestBody Bill request) {
+		return (request.getPrice() + request.getPrice() * request.getVatRate()) * request.getQuantity();
+	}
+
+```
+
+We use the PostMapping annotation class in which we specify param and request format (json). We accept request as a Bill param, annotated by @RequestBody. Easy.
+
+Let's also create a unit test for this endpoint in src/test/java/tutorial/web/CommandTest.java:
+
+```java
+
+	@Test
+	public void calculatePriceTest() throws Exception {
+		Bill bill = new Bill(5, 2, 0.2);
+		String expectedPrice = "12.0";
+		ObjectMapper mapper = new ObjectMapper();
+		String billJson = mapper.writeValueAsString(bill);
+		
+		 mvc.perform(MockMvcRequestBuilders.post("/myapi/price")
+				 .contentType(MediaType.APPLICATION_JSON)
+				 .content(billJson)
+				 .accept(MediaType.APPLICATION_JSON))
+		 .andExpect(status().isOk())
+		 .andExpect(content().string(expectedPrice));
+	}
+
+```
+
+We use ObjectMapper from jackson library (import com.fasterxml.jackson.databind.ObjectMapper;) to map our class into json string. In this method you create a new Bill object with a constructor will all arguments which is not declared in the class. You can either add it manually:
+
+```java
+	public Bill(int quantity, double price, double vatRate) {
+		this.quantity = quantity;
+		this.price = price;
+		this.vatRate = vatRate;
+	}
+```
+
+or use lombok library again and simply add @AllArgsConstructor annotation to your class, like @Data. Add also @NoArgsConstructor annotation, required by spring to use it as a request body model.
+
+
+Again, we don't want to have functionality in Command.java, just endpoint declaration. Create a method in CommandService.java to calculate the bill, with Bill object as param. In calculatePrice() method pass a request to it and return the result. Add the unit test for this class as well. (Note: assertEquals for double params requires 3rd argument, delta for floating point numbers comparison. Just add 0 as a delta param: `assertEquals(12.0, commandService.getPrice(new Bill(5, 2, 0.2)), 0);`)
+
+You can test your endpoint in Postman by sending POST request with following request body:
+
+```java
+{
+	"quantity": 5,
+	"price": 2,
+	"vatRate": 0.2
+}
+```
+
+or with curl:
+
+```
+curl -X POST \
+  http://localhost:8080/myapi/price \
+  -H 'Content-Type: application/json' \
+  -d '{
+	"quantity": 5,
+	"price": 2,
+	"tax": 0.2
+}'
+```
