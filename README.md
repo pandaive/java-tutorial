@@ -507,14 +507,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Component
 @RestControllerAdvice
 public class Handler {
-	
+
 	@ExceptionHandler(value = HttpMessageNotReadableException.class)
     @ResponseBody
     public void handle(HttpMessageNotReadableException e, HttpServletResponse response) throws IOException {
         String message = "Invalid value given in request body. " + convertHttpNotReadableExceptionMessage(e.getMessage());
         response.sendError(HttpStatus.BAD_REQUEST.value(), message);
     }
-	
+
 	private String convertHttpNotReadableExceptionMessage(String message) {
         String firstLine = message.substring(message.indexOf("type"), message.indexOf("\n"));
         String[] s = firstLine.split(" ");
@@ -523,7 +523,7 @@ public class Handler {
         String requiredValue = s[s.length-2];
         String givenValueType = s[3];
         String givenValue = fields[1];
-        
+
         return "Field " + fieldName + " must be of type " + requiredValue + ". "
                 + "Value of type " + givenValueType + " provided: " + givenValue + ".";
     }
@@ -543,7 +543,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class MaximumQuantityExceededException extends RuntimeException {
-	
+
 	public MaximumQuantityExceededException(int quantity) {
 		super("Quantity " + quantity + " exceeds maximum quantity allowed: 10");
 	}
