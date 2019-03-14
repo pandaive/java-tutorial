@@ -562,3 +562,49 @@ public double getPrice(Bill bill) {
 ```
 
 Now try to send request with quantity higher than 10.
+
+<h2> Step 7: logs </h2>
+
+No need for introduction what logs are for. Lombok comes with a @Slf4j annotation which gives you static final `log` field of type Logger which you can use to add custom logs to your API.
+
+For usage, you simply import Slf4j and add @Slf4j annotation like here:
+
+```java
+...
+
+import lombok.extern.slf4j.Slf4j;
+
+@RestController
+@RequestMapping("/myapi")
+@Slf4j
+public class Command {
+
+...
+```
+
+and then you can use log.info(msg), log.error(msg), log.warn(msg) etc. Checkout the Slf4j.Logger documentation here: https://www.slf4j.org/api/org/slf4j/Logger.html for details and all available methods.
+
+Let's add a log to see incoming request in our POST endpoint with request body in it (using method info(String format, Object arg)):
+
+```java
+@RequestMapping("/myapi")
+@RestController
+@Slf4j
+public class Command {
+	
+	@Autowired
+	CommandService commandService;
+	
+	@PostMapping(path = "/price", consumes = "application/json")
+	public double calculatePrice(@RequestBody Bill request) {
+		log.info("[Command] Received new calculatePrice request. Request body: {}", request);
+		return commandService.getPrice(request);
+	}
+}
+```
+
+Start the API, shoot a POST request to this endpoint and check the logs in terminal for log like this:
+
+```
+2019-03-14 15:02:44.067  INFO 28684 --- [nio-8080-exec-1] tutorial.web.Command : [Command] Received new calculatePrice request. Request body: Bill(quantity=5, price=2.0, vatRate=0.2)
+```
