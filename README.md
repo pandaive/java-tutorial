@@ -565,7 +565,7 @@ Now try to send request with quantity higher than 10.
 
 <h2> Step 7: logs </h2>
 
-No need for introduction what logs are for. Lombok comes with a @Slf4j annotation which gives you static final `log` field of type Logger which you can use to add custom logs to your API.
+No need for introduction what logs are for. Lombok comes with a @Slf4j class annotation which gives you static final `log` field of type Logger which you can use to add custom logs to your API within annotated class.
 
 For usage, you simply import Slf4j and add @Slf4j annotation like here:
 
