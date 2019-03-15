@@ -618,9 +618,9 @@ First we add a springfox-swagger2 dependency in our build.gradle file:
 ```
 ...
 
-	compile 'org.projectlombok:lombok:1.16.10'
-	
-	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.6.1'
+    compile 'org.projectlombok:lombok:1.16.10'
+
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.6.1'
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
