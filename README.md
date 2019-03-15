@@ -608,3 +608,138 @@ Start the API, shoot a POST request to this endpoint and check the logs in termi
 ```
 2019-03-14 15:02:44.067  INFO 28684 --- [nio-8080-exec-1] tutorial.web.Command : [Command] Received new calculatePrice request. Request body: Bill(quantity=5, price=2.0, vatRate=0.2)
 ```
+
+<h2> Step 8: Swagger </h2>
+
+Swagger is a useful tool to generate documentation based on a code itself. Read more here: https://swagger.io/ and http://springfox.github.io/springfox/
+
+First we add a springfox-swagger2 dependency in our build.gradle file:
+
+```
+...
+
+	compile 'org.projectlombok:lombok:1.16.10'
+	
+	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.6.1'
+
+    // Use JUnit test framework
+    testCompile 'junit:junit:4.12'
+    
+...
+```
+
+Later we annotate parts of our API with descriptions. Checkout available annotations here: https://github.com/swagger-api/swagger-core/wiki/annotations#quick-annotation-overview.
+
+Annotate classes with endpoints with @Api to indicate that they are swagger resources and annotate HTTP methods with @ApiOperation and @ApiResponses annotations:
+
+```java
+...
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api
+@RestController
+@RequestMapping("/myapi")
+public class Query {
+	
+	@Autowired
+	QueryService queryService;
+	
+	@ApiOperation(value = "Get name", notes = "Get yourself a hello")
+	@GetMapping(path = "/hello/{name}")
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "Success", response = String.class),
+		@ApiResponse(code = 400, message = "Bad Request"),
+		@ApiResponse(code = 404, message = "Not Found"),
+		@ApiResponse(code = 500, message = "Failure")})
+	public String getHello(@PathVariable String name) {
+		return queryService.getHello(name);
+	}
+
+}
+```
+
+```java
+...
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api
+@RequestMapping("/myapi")
+@RestController
+@Slf4j
+public class Command {
+	
+	@Autowired
+	CommandService commandService;
+	
+	@ApiOperation(value = "Calculate price", notes = "Send your bill, get the price")
+	@PostMapping(path = "/price", consumes = "application/json")
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "Success", response = Double.class),
+		@ApiResponse(code = 400, message = "Bad Request"),
+		@ApiResponse(code = 404, message = "Not Found"),
+		@ApiResponse(code = 500, message = "Failure")})
+	public double calculatePrice(@RequestBody Bill request) {
+		log.info("[Command] Received new calculatePrice request. Request body: {}", request);
+		return commandService.getPrice(request);
+	}
+}
+```
+
+Then also annotate a model used in a POST request to describe it in documentation as @ApiModel and its fields as @ApiModelProperty:
+
+```java
+...
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel(value = "Bill", description = "Data about the bill")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Bill {
+
+	@ApiModelProperty(dataType = "Integer", value = "Quantity of a product on a bill", required = true, example = "5")
+	private int quantity;
+	
+	@ApiModelProperty(dataType = "Double", value = "Price of a product", required = true, example = "15.99")
+	private double price;
+	
+	@ApiModelProperty(dataType = "Double", value = "VAT rate to be used to calculate the bill", required = false, example = "0.23")
+	private double vatRate;
+	
+}
+```
+
+Now you need to enable swagger api-doc path by annotating main API class:
+
+```java
+...
+
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+@EnableSwagger2
+@SpringBootApplication
+public class Application {
+	
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+
+}
+```
+
+Now run your API, you can access JSON representation of an API at `http://localhost:8080/v2/api-docs`.
+
+There is another springfox-swagger tool that will create a nice visual documentation with testing tools, to use it, just add another dependency and rebuild and run your API.
+
+```
+	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.6.1'
+	compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.6.1'
+```
+
+You can access generated documentation and try it out here: `http://localhost:8080/swagger-ui.html`
