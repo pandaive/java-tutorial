@@ -3,7 +3,8 @@ Follow these steps to create your first Spring boot API using Gradle and Java 8.
 
 <h2> Prerequisites </h2>
 
-* java 8 (sudo apt-get install openjdk-8-jdk)
+* java 8 (`sudo apt-get install openjdk-8-jdk`)
+* gradle (`sudo apt-get install gradle`)
 * if you use eclipse/intellij, install gradle support and lombok support https://projectlombok.org/
 * git clone this repository
 
@@ -27,7 +28,7 @@ In this repository, you can find basic gradle project structure:
 ├── settings.gradle
 ```
 
-Source files are split into main - java classes and test - unit tests for java classes. By convention you keep classes and their tests in the same directory schema so, having class Library and test class LibraryTest, you would keep them like this:
+Source files are split into `main` - java classes and `test` - unit tests for java classes. By convention you keep classes and their tests in the same directory schema so, having class Library and test class LibraryTest, you would keep them like this:
 
 ```
 ├── src
@@ -41,7 +42,7 @@ Source files are split into main - java classes and test - unit tests for java c
 │   │           ├── LibraryTest.java
 ```
 
-Check out the build.gradle file. It contains project plugins, dependencies, repositories, build scripts etc. Now it's initialized with basic java plugin, test library dependency and jcenter() repository.
+Check out the `build.gradle` file. It contains project plugins, dependencies, repositories, build scripts etc. Now it's initialized with basic java plugin, test library dependency and jcenter() repository.
 
 ------------------------
 
@@ -71,9 +72,9 @@ Let's create application starting point: class Application.java in tutorial pack
 package tutorial;
 
 public class Application {
-	
+
 	public static void main(String[] args) {
-		System.out.println("Hello world!");
+		System.out.println("Hello, world!");
 	}
 
 }
@@ -95,7 +96,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 ```
 
-The Application plugin facilitates creating an executable JVM application.  MainClassName defines the main class. You also specify compatibility of your application. mainClassName is set to entrypoint, so we want to keep such stuff in a gradle properties file to keep everything clean.
+The `application` plugin facilitates creating an executable JVM application. `mainClassName` defines the main class. You also specify compatibility of your application. `mainClassName` is set to entrypoint, so we want to keep such stuff in a gradle properties file to keep everything clean.
 
 Create `gradle.properties` file in a project root directory with entrypoint declaration:
 
@@ -105,7 +106,7 @@ entrypoint=tutorial.Application
 
 Now do `./gradlew build` and `./gradlew run` again. Now you should see Hello World message!
 
-Further when "run application" stated, it means executing those both commands if not stated otherwise.
+From now on when "run application" is said, it means executing those both commands if not stated otherwise.
 
 <h2> Step 2: create Spring Boot application </h2>
 
@@ -158,7 +159,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Application {
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -171,6 +172,8 @@ You will see your application started with Spring logo, a lot of logs and finall
 ```
 2019-03-12 09:37:51.444  INFO 17860 --- [main] tutorial.Application: Started Application in 4.125 seconds (JVM running for 4.572)
 ```
+
+To terminate the application press Ctrl+C.
 
 <h2> Step 3: Create first API endpoints </h2>
 
@@ -186,18 +189,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/myapi")
 public class Query {
-	
+
 	@GetMapping(path = "/hello")
 	public String getHello() {
-		return "Hello world!";
+		return "Hello, world!";
 	}
 
 }
 ```
 
-We annotate it with @RestController to indicate that this class containts Rest endpoints and we specify path mappings, one to whole class - automatically prefixed to each endpoint path and one to specific endpoint. Now build and run your project. By default, your API will be listening on port 8080. Use postman to GET http://localhost:8080/myapi/hello or just type the address in your browser. You should see a Hello World response! Also checkout the logs in your terminal to see that spring handled this request.
+We annotate it with `@RestController` to indicate that this class containts Rest endpoints and we specify path mappings, one to whole class - automatically prefixed to each endpoint path and one to specific endpoint. Now build and run your project. By default, your API will be listening on port 8080. Use postman to GET `http://localhost:8080/myapi/hello` or just type the address in your browser. You should see a Hello World response! Also checkout the logs in your terminal to see that spring handled this request.
 
-Take a time to think about unit test to your endpoint. Create a QueryTest.java in src/test/java/tutorial/web and create a test using MockMvc to mock your request.
+Take a time to think about unit test to your endpoint. Create a `QueryTest.java` in `src/test/java/tutorial/web` and create a test using MockMvc to mock your request.
 
 ```java
 package tutorial.web;
@@ -215,20 +218,19 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class QueryTest {
-	
+
 	@Autowired
 	private MockMvc mvc;
-	
+
 	@Test
 	public void getHello() throws Exception {
 		 mvc.perform(MockMvcRequestBuilders.get("/myapi/hello").accept(MediaType.APPLICATION_JSON))
-         	.andExpect(status().isOk())
-         	.andExpect(content().string("Hello world!"));
+			.andExpect(status().isOk())
+			.andExpect(content().string("Hello, world!"));
 	}
 
 }
@@ -238,7 +240,7 @@ Now build your application again. You should see additional test task from gradl
 
 <h2> Step 4: Path params, request params, service classes </h2>
 
-First of all, we want to move the functionality of request handling from web/Query class to keep only endpoint declaration there. It will coome useful when we do more complicated endpoints. Create tutorial/service directory and create QueryService.java class inside. Annotate it as a @Component so we will be able to inject it in Query class and use it to handle the request.
+First of all, we want to move the functionality of request handling from `web/Query` class to keep only endpoint declaration there. It will come useful when we do more complicated endpoints. Create `tutorial/service/` directory with `QueryService.java` class inside. Annotate it as a `@Component` so we will be able to inject it in `Query` class and use it to handle the request.
 
 ```java
 package tutorial.service;
@@ -247,15 +249,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class QueryService {
-	
+
 	public String getHello() {
-		return "Hello World";
+		return "Hello, World";
 	}
-	
+
 }
 ```
 
-Now use this class in Query.java.
+Now use this class in `Query.java`.
 
 ```java
 ...
@@ -264,10 +266,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tutorial.service.QueryService;
 
 public class Query {
-	
+
 	@Autowired
 	QueryService queryService;
-	
+
 	@GetMapping(path = "/hello")
 	public String getHello() {
 		return queryService.getHello();
@@ -292,21 +294,21 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class QueryServiceTest {
-	
+
 	@Autowired
 	QueryService queryService;
-	
+
 	@Test
 	public void getHelloTest() {
-		assertEquals("Hello World!", queryService.getHello());
+		assertEquals("Hello, World!", queryService.getHello());
 	}
 
 }
 ```
 
-Notice that you again autowire queryService object to use it.
+Notice that you again autowire `queryService` object to use it.
 
-Now let's handle the path param and say hello to you. You need to add it in a path declaration and also pass it to a method as a param. Spring will handle that for you, just use @PathVariable annotation.
+Now let's handle the path param and say hello to you. You need to add it in a path declaration and also pass it to a method as a param. Spring will handle that for you, just use `@PathVariable` annotation.
 
 ```java
 import org.springframework.web.bind.annotation.PathVariable;
@@ -319,7 +321,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 	}
 ```
 
-Adjust getHello() method in QueryService class to handle the param:
+Adjust `getHello()` method in QueryService class to handle the param:
 
 ```java
 	public String getHello(String name) {
@@ -342,21 +344,21 @@ You can try it out by yourself.
 
 <h2> Step 5: POST endpoint, request body </h5>
 
-Finally let's create a POST endpoint (put/delete will work similarly). 
+Finally let's create a POST endpoint (put/delete will work similarly).
 
-Let's create another class in `web/` directory, Command.java. Annotate it with @RestController and add a method to handle the post request to your API. 
+Let's create another class in `web/` directory, `Command.java`. Annotate it with `@RestController` and add a method to handle the post request to your API.
 
-Create CommandService.java in service directory, annotate it as Component and autowire it into Command.java. The same way as with Query classes. 
+Create `CommandService.java` in service directory, annotate it as Component and autowire it into `Command.java`. The same way as with `Query` classes.
 
-Define path mapping. Path mapping of command can be the same as of query (@RequestMapping("/myapi")). 
+Define path mapping. Path mapping of command can be the same as of query (`@RequestMapping("/myapi")`).
 
-Add a test classes CommandTest.java and CommandServiceTest.java in `src/test/java/tutorial/web` and `src/test/java/tutorial/service`. 
+Add a test classes `CommandTest.java` and `CommandServiceTest.java` in respective directories.
 
-To handle POST request we will need to define model class, so the spring will get json request body and inject it in an object of this class. 
+To handle POST request we will need to define model class, so the spring will get json request body and inject it in an object of this class.
 
 Let's build an endpoint to calculate the bill price. We will need to provide bill information: product quantity, price and vat rate :wink:
 
-Create `tutorial/model` directory. Create a Bill.java class and declare 3 fields:
+Create `tutorial/model` directory. Create a `Bill.java` class and declare 3 fields:
 
 ```java
 package tutorial.model;
@@ -366,7 +368,7 @@ public class Bill {
 	private int quantity;
 	private double price;
 	private double vatRate;
-	
+
 }
 ```
 
@@ -379,7 +381,7 @@ dependencies {
 	compile "org.springframework.boot:spring-boot-starter"
 	compile "org.springframework.boot:spring-boot-starter-web"
 	compile "org.springframework.boot:spring-boot-starter-test"
-	
+
 	compile 'org.projectlombok:lombok:1.16.10'
 
 	...
@@ -388,7 +390,7 @@ dependencies {
 
 If you use IDE, you may need to refresh your gradle project to be able to use those annotations. Otherwise, just do `./gradlew build` to download the libraries. You can checkout lombok annotations here: https://projectlombok.org/features/all
 
-We want to use @Data annotation, to generate getters and setters. Add it for the class, and you can assume that you have getters and setters for all of the fields.
+We want to use `@Data` annotation, to generate getters and setters. Add it for the class, and you can assume that you have getters and setters for all of the fields.
 
 ```java
 import lombok.Data;
@@ -399,8 +401,7 @@ public class Bill {
 }
 ```
 
-Now let's create a POST endpoint in Command.java which will receive json request body with fields as declared in Bill class.
-
+Now let's create a POST endpoint in `Command.java` which will receive json request body with fields as declared in Bill class.
 
 ```java
 	@PostMapping(path = "/price", consumes = "application/json")
@@ -422,7 +423,7 @@ Let's also create a unit test for this endpoint in src/test/java/tutorial/web/Co
 		String expectedPrice = "12.0";
 		ObjectMapper mapper = new ObjectMapper();
 		String billJson = mapper.writeValueAsString(bill);
-		
+
 		 mvc.perform(MockMvcRequestBuilders.post("/myapi/price")
 				 .contentType(MediaType.APPLICATION_JSON)
 				 .content(billJson)
@@ -467,7 +468,7 @@ curl -X POST \
   -d '{
 	"quantity": 5,
 	"price": 2,
-	"tax": 0.2
+	"vatRate": 0.2
 }'
 ```
 
@@ -506,14 +507,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Component
 @RestControllerAdvice
 public class Handler {
-	
+
 	@ExceptionHandler(value = HttpMessageNotReadableException.class)
     @ResponseBody
     public void handle(HttpMessageNotReadableException e, HttpServletResponse response) throws IOException {
         String message = "Invalid value given in request body. " + convertHttpNotReadableExceptionMessage(e.getMessage());
         response.sendError(HttpStatus.BAD_REQUEST.value(), message);
     }
-	
+
 	private String convertHttpNotReadableExceptionMessage(String message) {
         String firstLine = message.substring(message.indexOf("type"), message.indexOf("\n"));
         String[] s = firstLine.split(" ");
@@ -522,7 +523,7 @@ public class Handler {
         String requiredValue = s[s.length-2];
         String givenValueType = s[3];
         String givenValue = fields[1];
-        
+
         return "Field " + fieldName + " must be of type " + requiredValue + ". "
                 + "Value of type " + givenValueType + " provided: " + givenValue + ".";
     }
@@ -542,7 +543,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class MaximumQuantityExceededException extends RuntimeException {
-	
+
 	public MaximumQuantityExceededException(int quantity) {
 		super("Quantity " + quantity + " exceeds maximum quantity allowed: 10");
 	}
